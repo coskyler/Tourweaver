@@ -9,7 +9,7 @@ export default function Map(style, defaultCenter, defaultZoom) {
       <div className="w-full">
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
         <GoogleMap
-            style={{ width: '65vw', height: '100vh' }}
+            style={{ width: '70vw', height: '100vh' }}
             defaultCenter={{ lat: 40.7128, lng: -74.0060 }}
             defaultZoom={10}
             gestureHandling='greedy'

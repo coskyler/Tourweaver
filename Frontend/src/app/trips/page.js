@@ -46,6 +46,7 @@ function page() {
       category: "Park",
       estimatedTime: "45 min",
       distance: "1.2 mi",
+      imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop"
     },
     {
       id: 4,
@@ -81,7 +82,8 @@ function page() {
   return (
     <>
     <div className="flex h-screen">
-        <div className="w-1/3 overflow-y-auto">
+        <div className="w-1/2 overflow-y-auto">
+
             <ProgressSection 
             currentStep={currentStep} />
             {sampleDestinations.map((destination) => (

@@ -1,19 +1,4 @@
-/*"use client"
 
-import Header from "../components/sections/header"
-import Footer from "../components/sections/footer"
-import Map from "../components/map-related/map"
-
-export default function Home() {
-  return (
-    <main>
-      <Header/>
-        
-      <Footer/>
-    </main>
-  )
-}
-*/
 "use client"
 
 import { useState } from 'react';
@@ -22,11 +7,11 @@ import Footer from '../components/sections/footer';
 
 export default function Home() {
   const [formData, setFormData] = useState({
-    naturalLanguage: '',
-    startLocation: '',
-    targetLocation: '',
-    tourType: 'walking',
-    tripLength: '',
+    prompt: '',
+    startingCoords: {lat: 0, long: 0},
+    targetCoords: {lat:0, long:0},
+    transportationMethod: 'walking',
+    tourMinutes: '', 
   });
 
   const handleSubmit = async (e) => {
@@ -81,13 +66,13 @@ export default function Home() {
               
               {/* Natural Language Input - PRIMARY INPUT */}
               <div className="text-left">
-                <label htmlFor="naturalLanguage" className="block text-sm font-semibold text-black mb-2">
+                <label htmlFor="prompt" className="block text-sm font-semibold text-black mb-2">
                   Describe Your Tour
                 </label>
                 <textarea
-                  id="naturalLanguage"
-                  name="naturalLanguage"
-                  value={formData.naturalLanguage}
+                  id="prompt"
+                  name="prompt"
+                  value={formData.prompt}
                   onChange={handleChange}
                   placeholder="E.g., 'Show me historic landmarks and coffee shops in downtown, family-friendly activities'"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:outline-none text-black resize-none"
@@ -101,14 +86,14 @@ export default function Home() {
                 
                 {/* Start Location */}
                 <div className="text-left">
-                  <label htmlFor="startLocation" className="block text-sm font-semibold text-black mb-2">
+                  <label htmlFor="startCoords" className="block text-sm font-semibold text-black mb-2">
                     Starting Location
                   </label>
                   <input
                     type="text"
-                    id="startLocation"
-                    name="startLocation"
-                    value={formData.startLocation}
+                    id="startCoords"
+                    name="startCoords"
+                    value={formData.startCoords}
                     onChange={handleChange}
                     placeholder="Enter address or landmark"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:outline-none text-black"
@@ -118,14 +103,14 @@ export default function Home() {
 
                 {/* Target Location (Optional) */}
                 <div className="text-left">
-                  <label htmlFor="targetLocation" className="block text-sm font-semibold text-black mb-2">
+                  <label htmlFor="targetCoords" className="block text-sm font-semibold text-black mb-2">
                     Ending Location <span className="text-gray-400 font-normal">(Optional)</span>
                   </label>
                   <input
                     type="text"
-                    id="targetLocation"
-                    name="targetLocation"
-                    value={formData.targetLocation}
+                    id="targetCoords"
+                    name="targetCoords"
+                    value={formData.targetCoords}
                     onChange={handleChange}
                     placeholder="Leave blank for round trip"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:outline-none text-black"
@@ -134,13 +119,13 @@ export default function Home() {
 
                 {/* Tour Type */}
                 <div className="text-left">
-                  <label htmlFor="tourType" className="block text-sm font-semibold text-black mb-2">
+                  <label htmlFor="transportationMethod" className="block text-sm font-semibold text-black mb-2">
                     Tour Type
                   </label>
                   <select
-                    id="tourType"
-                    name="tourType"
-                    value={formData.tourType}
+                    id="transportationMethod"
+                    name="transportationMethod"
+                    value={formData.transportationMethod}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:outline-none text-black bg-white"
                     required
@@ -152,14 +137,14 @@ export default function Home() {
 
                 {/* Trip Length */}
                 <div className="text-left">
-                  <label htmlFor="tripLength" className="block text-sm font-semibold text-black mb-2">
+                  <label htmlFor="tourMinutes" className="block text-sm font-semibold text-black mb-2">
                     Desired Trip Length (miles)
                   </label>
                   <input
                     type="number"
-                    id="tripLength"
-                    name="tripLength"
-                    value={formData.tripLength}
+                    id="tourMinutes"
+                    name="tourMinutes"
+                    value={formData.tourMinutes}
                     onChange={handleChange}
                     placeholder="E.g., 5"
                     min="0.1"
