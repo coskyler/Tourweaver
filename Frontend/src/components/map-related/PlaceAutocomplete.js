@@ -14,18 +14,29 @@ export default function PlaceAutocomplete({ onPlaceSelect, className }) {
     }
 
     const options = {
-      fields: ['geometry', 'name', 'formatted_address']
+      fields: ['geometry', 'name', 'formatted_address', 'address_components']
     };
 
     autocomplete.current = new places.Autocomplete(inputRef.current, options);
 
     autocomplete.current.addListener('place_changed', () => {
       const place = autocomplete.current.getPlace();
+
       if (place.geometry && place.geometry.location) {
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
+
+        let city = '';
+        if (place.address_components) {
+          for (const component of place.address_components) {
+            if (component.types.includes('locality')) {
+              city = component.long_name;
+              break;
+            }
+          }
+        }
         if (onPlaceSelect) {
-          onPlaceSelect({ lat, lng });
+          onPlaceSelect({ lat, lng, city });
         }
       }
     });
