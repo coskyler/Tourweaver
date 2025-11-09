@@ -6,6 +6,7 @@ import Footer from "../../components/sections/footer";
 import PlaceAutocomplete from "../../components/map-related/PlaceAutocomplete";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { useRouter } from "next/navigation"
+import axios from "axios"
 
 export default function Home() {
 
@@ -21,13 +22,14 @@ export default function Home() {
 
   const router = useRouter()
 
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // This is a placeholder. You'll need to get the actual logged-in user's ID.
+    const ownerId = "some-user-id";
+
     try {
-      const response = await axios.post("/tour", {
+      const response = await axios.post("http://localhost:8085/tours", {
         userPrompt: formData.prompt,
         startingCoords: formData.startingCoords,
         targetCoords: formData.targetCoords,
@@ -35,13 +37,29 @@ export default function Home() {
         transportationMethod: formData.transportationMethod,
         searchRadius: formData.searchRadius,
         city: formData.city,
+        owner: ownerId, // Add the owner ID here
       });
-      console.log("Job ID:", response.data.jobId);
 
+      const tourId = response.data.id;
+      console.log("Tour ID:", tourId);
+
+      // Navigate to the new trip page on success
+      router.push(`/trips/${tourId}`);
     } catch (error) {
       console.error("Error creating tour:", error);
-    } finally {
-      router.push(`/trips/${response.data.jobId}`)
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error("Data:", error.response.data);
+        console.error("Status:", error.response.status);
+        console.error("Headers:", error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Request:", error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error Message:", error.message);
+      }
     }
   };
 
