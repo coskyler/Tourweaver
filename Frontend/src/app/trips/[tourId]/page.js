@@ -1,114 +1,83 @@
 "use client"
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../../components/sections/header';
 import ProgressSection from '../../../components/sections/progressSection'
 import Map from '../../../components/map-related/map'
 import DestinationCard from '../../../components/sections/Destination';
+import axios from 'axios';
+import { useParams } from 'next/navigation';
+import { auth } from "../../../lib/firebase";
 
-
-
-
-function page() {
+function Page() {
   const [currentStep, setCurrentStep] = useState(0);
-  const sampleDestinations = [
-    {
-      id: 1,
-      name: "The Wharf Marina",
-      address: "401 Biscayne Blvd, Miami, FL 33132",
-      description: "Scenic waterfront destination perfect for evening strolls and sunset views. Features multiple dining options and boat tours.",
-      rating: 4.7,
-      reviewCount: 342,
-      priceLevel: 2,
-      category: "Attraction",
-      estimatedTime: "30 min",
-      distance: "0.3 mi",
-      imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop"
-    },
-    {
-      id: 2,
-      name: "Café Lumière",
-      address: "1250 Collins Ave, Miami Beach, FL 33139",
-      description: "Charming French-inspired café serving artisanal pastries and specialty coffee in a cozy atmosphere.",
-      rating: 4.5,
-      reviewCount: 189,
-      priceLevel: 2,
-      category: "Restaurant",
-      estimatedTime: "20 min",
-      distance: "0.8 mi",
-      imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop"
-    },
-    {
-      id: 3,
-      name: "Ocean View Park",
-      address: "500 Ocean Drive, Miami Beach, FL 33139",
-      description: "Beautiful beachside park with walking trails, picnic areas, and stunning ocean panoramas. Great for relaxation and photography.",
-      rating: 4.8,
-      reviewCount: 521,
-      priceLevel: 1,
-      category: "Park",
-      estimatedTime: "45 min",
-      distance: "1.2 mi",
-      imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop"
-    },
-    {
-      id: 4,
-      name: "Artisan Market Square",
-      address: "789 Lincoln Road, Miami Beach, FL 33139",
-      description: "Vibrant marketplace featuring local artisans, handcrafted goods, and live entertainment every weekend.",
-      rating: 4.4,
-      reviewCount: 267,
-      priceLevel: 2,
-      category: "Shopping",
-      estimatedTime: "40 min",
-      distance: "0.6 mi",
-      imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop"
-    }
-  ];
-
-  // Simulate progress
-  /*
+  const [destinations, setDestinations] = useState([]);
+  const { tourId } = useParams();
   useEffect(() => {
-    const stepInterval = setInterval(() => {
-      setCurrentStep(prev => {
-        if (prev < 6) {
-          return prev + 1;
-        }
-        return prev;
-      });
-    }, 2000);
+    const fetchData = async () => {
+      let user = auth.currentUser;
 
-    return () => {
-      clearInterval(stepInterval);
+      // wait until Firebase finishes loading the user
+
+      while (!user) {
+        await new Promise((r) => setTimeout(r, 100));
+        user = auth.currentUser;
+      }
+      console.log("user loaded!");
+
+      const token = await user.getIdToken();
+      const base = process.env.NEXT_PUBLIC_API_DOMAIN;
+      const res = await axios.get(`${base}/tours/${tourId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDestinations(res.data || []);
     };
-  }, []);
-  */
+
+    fetchData();
+  }, [tourId]);
+
+
 
   return (
-    <>
-    <Header/>
-    <div className="flex h-screen">
-        <div className="w-1/2 overflow-y-auto pt-8">
-            {/*
-            <ProgressSection 
-            currentStep={currentStep} /> */}
-            {sampleDestinations.map((destination) => (
-              <div key={destination.id} className="relative px-6 py-1">
-                <DestinationCard
-                  number={destination.id}
+    <div className="flex h-dvh min-h-0 min-w-0 flex-col">
+      <Header className="shrink-0" />
 
-                  {...destination}
-                />
-              </div>
-            ))}
+      <div className="flex flex-1 min-h-0 min-w-0">
+        {/* Left pane: scrolls internally */}
+        <div className="flex flex-col min-w-0 min-h-0 overflow-auto pt-8 px-4">
+          {/* Title + description */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Your Tour Plan</h1>
+            <p className="text-gray-600 text-sm">
+              Explore your personalized itinerary below. Each stop is ordered for an optimal route.
+            </p>
+          </div>
+
+          {/* Destination list */}
+          {destinations.map((destination) => (
+            <div key={destination.seq} className="relative py-2">
+              <DestinationCard
+                number={destination.seq}
+                name={destination.name}
+                address={destination.address}
+                description={destination.description}
+                rating={destination.rating}
+                priceLevel={destination.price}
+                category="Attraction"
+                imageUrl={destination.photo}
+              />
+            </div>
+          ))}
         </div>
 
-        <div className="w-2/3 h-screen overflow-hidden">
-            <Map>
-            </Map>
+        {/* Right pane: map */}
+        <div className="flex-1 min-w-0 relative">
+          <div className="absolute inset-0">
+            <Map />
+          </div>
         </div>
+      </div>
     </div>
-    </>
-  )
+  );
 }
 
-export default page
+export default Page;

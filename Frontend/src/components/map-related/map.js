@@ -6,10 +6,10 @@ import { APIProvider, Map as GoogleMap } from '@vis.gl/react-google-maps'
 
 export default function Map(style, defaultCenter, defaultZoom) {
   return (
-      <div className="w-full">
+      <div className="w-full h-full">
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
         <GoogleMap
-            style={{ width: '70vw', height: '100vh' }}
+            style={{ width: '100%', height: '100%' }}
             defaultCenter={{ lat: 40.7128, lng: -74.0060 }}
             defaultZoom={10}
             gestureHandling='greedy'

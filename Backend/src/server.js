@@ -2,9 +2,13 @@ import express from "express";
 import cors from "cors";
 import admin from "firebase-admin";
 import tripRouter from "./routes/trip.js";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const serviceAccount = require("./infra/serviceAccountKey.json");
 
 admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const app = express();
@@ -16,7 +20,7 @@ app.use(
 );
 app.use(express.json());
 
-/*/ verify auth via firebase
+// verify auth via firebase
 app.use(async (req, res, next) => {
   const header = req.headers.authorization || "";
   const match = header.match(/^Bearer (.+)$/);
@@ -30,7 +34,7 @@ app.use(async (req, res, next) => {
   } catch (err) {
     res.status(401).json({ error: "Invalid or expired token" });
   }
-}); /*/
+}); //
 
 // protected routes
 app.use("/tours", tripRouter);

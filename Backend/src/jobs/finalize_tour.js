@@ -1,12 +1,12 @@
 import ai from "../infra/gemini.js"
 
-export default async function askGeminiToFilter(userPrompt, places) {
+export default async function askGeminiToFinalize(userPrompt, places) {
   //remove null and unhelpful fields before prompting
   const readable = places.map(place =>
     Object.fromEntries(
       Object.entries(place).filter(
         ([key, value]) =>
-          !["priceLevel", "lng", "lat", "url"].includes(key) && value != null
+          !["priceLevel", "lng", "lat", "url", "photo"].includes(key) && value != null
       )
     )
   );

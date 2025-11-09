@@ -20,7 +20,7 @@ export default async function askGeminiToFilter(userPrompt, places, budget) {
       const cleaned = Object.fromEntries(
         Object.entries(place).filter(
           ([key, value]) =>
-            !["priceLevel", "lng", "lat", "url"].includes(key) && value != null
+            !["priceLevel", "lng", "lat", "url", "photo"].includes(key) && value != null
         )
       );
       return { ...cleaned, index };

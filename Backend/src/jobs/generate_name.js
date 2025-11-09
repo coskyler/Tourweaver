@@ -1,6 +1,6 @@
 import ai from "../infra/gemini.js"
 
-export default async function askGeminiToFilter(userPrompt, city) {
+export default async function askGeminiForName(userPrompt, city) {
   const prompt = `
 Given the following:
 Location = "${city}"
