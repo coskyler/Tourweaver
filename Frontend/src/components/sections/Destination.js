@@ -66,7 +66,12 @@ export default function DestinationCard({
           </div>
 
           {/* Price */}
-          <div className="flex items-center gap-1 text-base">{renderPriceSymbols()}</div>
+          <div
+            className={`flex items-center gap-1 text-base ${priceLevel === 0 ? "hidden" : ""
+              }`}
+          >
+            {renderPriceSymbols()}
+          </div>
 
           {/* Distance */}
           <div className="flex items-center gap-1 text-gray-600">

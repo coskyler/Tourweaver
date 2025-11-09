@@ -38,6 +38,7 @@ function Page() {
       const res = await axios.get(`${base}/tours/${tourId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res.data);
       setDestinations(res.data || []);
     };
 

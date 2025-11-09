@@ -8,6 +8,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { auth } from "../../lib/firebase";
+import ToursSection from "../../components/sections/ToursSection";
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -20,10 +21,14 @@ export default function Home() {
     city: "",
   });
 
+  const [submitting, setSubmitting] = useState(false);
+
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;            // prevent double submit
+    setSubmitting(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) throw new Error("Not signed in");
@@ -60,6 +65,8 @@ export default function Home() {
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.error || err.message || "Failed to create tour");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -87,7 +94,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <section className="relative min-h-[700px] flex items-center justify-center overflow-hidden py-12">
+      <section className="relative flex items-center justify-center overflow-hidden py-12">
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-green-100" />
         <div className="relative z-10 w-full max-w-4xl mx-auto px-6">
           <div className="text-center mb-8">
@@ -208,12 +215,23 @@ export default function Home() {
 
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg transition-colors duration-200 text-lg"
+              disabled={submitting}
+              className="mx-auto w-56 bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors duration-200 text-lg block"
             >
-              Generate My Tour
+              {submitting ? (
+                <span className="inline-flex items-center">
+                  Preparing
+                  <span className="ml-1 inline-block animate-pulse">...</span>
+                </span>
+              ) : (
+                "Generate My Tour"
+              )}
             </button>
           </form>
         </div>
+      </section>
+      <section className="max-w-7xl mx-auto px-6 my-12">
+        <ToursSection/>
       </section>
       <Footer />
     </div>
