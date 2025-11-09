@@ -79,7 +79,26 @@ router.get("/:tourId", async (req, res) => {
       })
     );
 
-    res.json(hydrated);
+    //get name and desc
+    const infoResult = await pool.query(
+      `SELECT name, description
+       FROM tour
+       WHERE id = $1
+       LIMIT 1`,
+      [tourId]
+    );
+
+    const tourName = infoResult.rows[0]?.name || null;
+    const tourDescription = infoResult.rows[0]?.description || null;
+
+    const withTourInfo = hydrated.map((row) => ({
+      ...row,
+      tourName,
+      tourDescription,
+    }));
+
+
+    res.json(withTourInfo);
   } catch (err) {
     console.error("Failed to fetch tour stops:", err);
     res.status(500).json({ error: "Failed to fetch tour stops" });
