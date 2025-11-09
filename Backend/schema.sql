@@ -30,6 +30,7 @@ CREATE TABLE tour_stop (
   snap_lat DOUBLE PRECISION,
   snap_lng DOUBLE PRECISION,
   snap_url TEXT,
+  snap_photo TEXT,
   PRIMARY KEY (tour_id, seq)
 );
 

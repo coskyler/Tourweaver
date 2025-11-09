@@ -6,6 +6,7 @@ import searchPlaces from "../jobs/search_places.js";
 import filterCandidates from "../jobs/filter_candidates.js";
 import finalizeTour from "../jobs/finalize_tour.js";
 import generateName from "../jobs/generate_name.js";
+import askGeminiForDescription from "../jobs/generate_description.js";
 
 const router = express.Router();
 
@@ -51,14 +52,34 @@ router.get("/:tourId", async (req, res) => {
      snap_address AS address,
      snap_lat AS lat,
      snap_lng AS lng,
-     snap_url AS url
+     snap_url AS url,
+     snap_photo AS photo
    FROM tour_stop
    WHERE tour_id = $1
    ORDER BY seq ASC`,
       [tourId]
     );
 
-    res.json(rows);
+    const hydrated = await Promise.all(
+      rows.map(async (r) => {
+        if (!r.photo) return { ...r, photo: null };
+
+        const mediaEndpoint = `https://places.googleapis.com/v1/${r.photo}/media?maxWidthPx=800&skipHttpRedirect=true&key=${process.env.GOOGLE_PLACES_API_KEY}`;
+
+        try {
+          const { data } = await axios.get(mediaEndpoint, {
+            headers: { Accept: "application/json" },
+          });
+          // data.photoUri is the direct CDN URL
+          return { ...r, photo: data?.photoUri ?? null };
+        } catch (e) {
+          // fall back to returning the media endpoint (browser will follow redirect)
+          return { ...r, photo: `https://places.googleapis.com/v1/${r.photo}/media?maxWidthPx=800&key=${process.env.GOOGLE_PLACES_API_KEY}` };
+        }
+      })
+    );
+
+    res.json(hydrated);
   } catch (err) {
     console.error("Failed to fetch tour stops:", err);
     res.status(500).json({ error: "Failed to fetch tour stops" });
@@ -114,12 +135,13 @@ router.post("/", async (req, res) => {
       const places = await searchPlaces(params, startingCoords, targetCoords);
       const candidates = await filterCandidates(userPrompt, places, budget);
       const finalists = await finalizeTour(userPrompt, candidates);
+      const genDescription = await askGeminiForDescription(userPrompt, finalists, city);
       // add stops to tour_stop db
       try {
         const insertSql = `
           INSERT INTO tour_stop
-            (tour_id, seq, description, snap_name, snap_rating, snap_price_level, snap_address, snap_lat, snap_lng, snap_url)
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+            (tour_id, seq, description, snap_name, snap_rating, snap_price_level, snap_address, snap_lat, snap_lng, snap_url, snap_photo)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
           ON CONFLICT (tour_id, seq) DO UPDATE SET
             description = EXCLUDED.description,
             snap_name = EXCLUDED.snap_name,
@@ -128,7 +150,8 @@ router.post("/", async (req, res) => {
             snap_address = EXCLUDED.snap_address            ,
             snap_lat = EXCLUDED.snap_lat,
             snap_lng = EXCLUDED.snap_lng,
-            snap_url = EXCLUDED.snap_url
+            snap_url = EXCLUDED.snap_url,
+            snap_photo = EXCLUDED.snap_photo
         `;
 
         for (let i = 0; i < finalists.length; i++) {
@@ -140,16 +163,17 @@ router.post("/", async (req, res) => {
           const priceLevel = priceMap[s.priceLevel] ?? 0;
 
           await pool.query(insertSql, [
-            tourRowId,                   // $1 tour_id
-            i + 1,                       // $2 seq
-            description,                 // $3
-            s.name,                      // $4 snap_name
-            s.rating ?? null,            // $5 snap_rating (1–5)
-            priceLevel,                  // $6 snap_price_level
-            s.formattedAddress ?? null,  // $7 snap_address
+            tourRowId,
+            i + 1,
+            description,
+            s.name,
+            s.rating ?? null,
+            priceLevel,
+            s.formattedAddress ?? null,
             s.lat ?? null,
             s.lng ?? null,
             s.url ?? null,
+            s.photo ?? null
           ]);
         }
 
@@ -159,9 +183,11 @@ router.post("/", async (req, res) => {
         try {
           await pool.query(
             `UPDATE tour
-          SET stops = $2, status = $3
-          WHERE id = $1`,
-            [tourRowId, finalists.length, "complete"]
+            SET stops = $2,
+              status = $3,
+              description = $4
+            WHERE id = $1`,
+            [tourRowId, finalists.length, "complete", genDescription]
           );
         } catch (err) {
           console.error("Failed to update tour status:", err);

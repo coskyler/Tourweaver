@@ -34,7 +34,8 @@ export default async function askPlaces(types, startingCoords, targetCoords) {
       "places.reviewSummary",
       "places.generativeSummary",
       "places.editorialSummary",
-      "places.types"
+      "places.types",
+      "places.photos"
     ].join(","),
     "Accept-Language": "en",
   };
@@ -79,7 +80,7 @@ export default async function askPlaces(types, startingCoords, targetCoords) {
     lat: place.location?.latitude ?? null,
     lng: place.location?.longitude ?? null,
     url: place.name ? `https://www.google.com/maps/place/?q=place_id:${place.name.split('/').pop()}` : null,
-
+    photo: place.photos?.[0]?.name ?? null,
   }));
 
 
