@@ -14,14 +14,12 @@ admin.initializeApp({
 
 const app = express();
 
-const corsConfig = {
+app.use(cors({
   origin: "https://tourweaver.coskyler.com",
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization"],
   credentials: true
-};
-app.use(cors(corsConfig));
-app.options("*", cors(corsConfig)); // <-- reuse same config
+}));
 
 
 app.use(express.json());
