@@ -3,6 +3,9 @@ import cors from "cors";
 import admin from "firebase-admin";
 import tripRouter from "./routes/trip.js";
 
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 const serviceAccount = require("./infra/serviceAccountKey.json");
 
 admin.initializeApp({
