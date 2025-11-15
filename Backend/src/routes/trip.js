@@ -81,7 +81,7 @@ router.get("/:tourId", async (req, res) => {
 
     //get name and desc
     const infoResult = await pool.query(
-      `SELECT name, description
+      `SELECT name, description, status
        FROM tour
        WHERE id = $1
        LIMIT 1`,
@@ -90,12 +90,15 @@ router.get("/:tourId", async (req, res) => {
 
     const tourName = infoResult.rows[0]?.name || null;
     const tourDescription = infoResult.rows[0]?.description || null;
+    const status = infoResult.rows[0]?.status || null;
 
-    const withTourInfo = hydrated.map((row) => ({
-      ...row,
+    const withTourInfo = {
       tourName,
       tourDescription,
-    }));
+      status,
+      stops: hydrated
+    };
+
 
 
     res.json(withTourInfo);
