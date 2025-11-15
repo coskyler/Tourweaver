@@ -30,6 +30,7 @@ app.use(express.json());
 // verify auth via firebase
 app.use(async (req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(204); //skip OPTIONS requests
+  if (req.path.startsWith("/tours/") && req.method === "GET") return next(); //public path
 
 
   const header = req.headers.authorization || "";
