@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 function formatDate(iso) {
   try {
@@ -23,6 +23,19 @@ export default function TourCard({
   type,
   created_at,
 }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleShareClick = async () => {
+    const url = `${window.location.origin}/tours/${id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1000);
+    } catch (err) {
+      console.error("Failed to copy tour URL:", err);
+    }
+  };
+
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white/50 shadow-sm transition hover:shadow-md">
       {/* Left accent */}
@@ -70,9 +83,20 @@ export default function TourCard({
 
         {/* Push footer to bottom */}
         <footer className="mt-auto pt-4 flex items-center justify-between">
-          <code className="rounded bg-gray-50 px-1.5 py-0.5 text-xs text-gray-500">
-            {id}
-          </code>
+          <button
+            type="button"
+            onClick={handleShareClick}
+            className="cursor-pointer flex flex-col items-start gap-0.5 rounded-md bg-black/5 px-2 py-1 text-xs text-gray-600 hover:bg-black/7"
+          >
+            <span className="inline-flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <rect x="9" y="9" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                <rect x="5" y="5" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+              <span>{copied ? "Copied" : "Share"}</span>
+            </span>
+            <code className="text-[11px] text-gray-500 break-all">{id}</code>
+          </button>
 
           <a
             href={`/tours/${id}`}
