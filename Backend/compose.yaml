@@ -1,3 +1,5 @@
+name: tourweaver
+
 services:
   server:
     image: tourweaver_server
